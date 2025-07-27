@@ -49,6 +49,11 @@ linters:
     - wastedassign # Find wasted assignment statements
     - whitespace # Detect leading and trailing whitespace
 
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
 linters-settings:
   errcheck:
   govet:
