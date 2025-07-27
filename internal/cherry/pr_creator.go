@@ -9,7 +9,7 @@ import (
 )
 
 // CreatePR creates a new GitHub pull request with the cherry-picked changes.
-func CreatePR(prData *github.PRData, targetBranch string, dryRun bool) (prURL string, err error) {
+func CreatePR(prData *github.PRData, targetBranch, branchName string, dryRun bool) (prURL string, err error) {
 	title := fmt.Sprintf("[cherry-pick] %s", prData.Title)
 
 	body := fmt.Sprintf(`Cherry-picked from #%d
@@ -18,7 +18,7 @@ func CreatePR(prData *github.PRData, targetBranch string, dryRun bool) (prURL st
 
 	labels := github.FormatLabels(prData.Labels)
 
-	args := []string{"pr", "create", "--title", title, "--body", body, "--base", targetBranch}
+	args := []string{"pr", "create", "--title", title, "--body", body, "--base", targetBranch, "--head", branchName}
 
 	if len(labels) > 0 {
 		args = append(args, "--label", strings.Join(labels, ","))

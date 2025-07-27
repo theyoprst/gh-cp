@@ -64,11 +64,13 @@ gh-cp 1319 release/v2.1 --dry-run
 
 2. **Validates PR State**: Ensures the PR is merged (cherry-picking unmerged changes is not supported)
 
-3. **Creates New Branch**: Checks out to the target branch and creates a new branch with the naming pattern `cherry-pick-to/target-branch/from/original-branch`
+3. **Creates Isolated Worktree**: Creates a temporary git worktree to perform operations without affecting your current working directory, allowing cherry-picking even with uncommitted changes
 
-4. **Cherry-picks Changes**: Applies all commits from the original PR to the new branch
+4. **Creates New Branch**: Creates a new branch with the naming pattern `cherry-pick-to/target-branch/from/original-branch`. If the branch already exists, adds incremental suffixes (`/0`, `/1`, etc.)
 
-5. **Creates New PR**: Pushes changes and creates a new pull request targeting the specified branch with:
+5. **Cherry-picks Changes**: Applies all commits from the original PR to the new branch in the isolated worktree
+
+6. **Creates New PR**: Pushes changes and creates a new pull request targeting the specified branch with:
    - Title prefixed with `[cherry-pick]`
    - Body prefixed with a reference message linking to the original PR
    - All original labels copied over
@@ -77,8 +79,15 @@ gh-cp 1319 release/v2.1 --dry-run
 
 ## Current Limitations
 
-- **Conflict Resolution**: The tool does not automatically resolve merge conflicts. If conflicts occur during cherry-picking, the process will stop and require manual intervention
+- **Conflict Resolution**: The tool does not automatically resolve merge conflicts. If conflicts occur during cherry-picking, the tool will leave the worktree in place and provide instructions for manual resolution
 - **Merged PRs Only**: Only works with merged pull requests
+
+## Conflict Resolution
+
+When cherry-pick conflicts occur, the tool will:
+1. Leave the temporary worktree in place (usually in `/tmp/gh-cp-worktree-*`)
+2. Display the worktree path and provide step-by-step manual resolution instructions
+3. Exit with an error message containing all necessary commands to complete the process
 
 ## Example Workflow
 
@@ -89,10 +98,12 @@ gh-cp 1319 release/v2.1
 
 This will:
 1. Fetch information about PR #1319
-2. Create a new branch `cherry-pick-to/release-v2.1/from/feature-branch-name` based on `release/v2.1`
-3. Cherry-pick all commits from PR #1319
-4. Push the new branch (with force to handle conflicts)
-5. Create a new PR from `cherry-pick-to/release-v2.1/from/feature-branch-name` → `release/v2.1` titled `[cherry-pick] Original PR Title` with a link back to PR #1319
+2. Create a temporary worktree to isolate operations
+3. Create a unique branch name like `cherry-pick-to/release-v2.1/from/feature-branch-name/0` (incrementing the suffix if needed)
+4. Cherry-pick all commits from PR #1319 in the isolated worktree
+5. Push the new branch (with force to handle conflicts)
+6. Create a new PR from the cherry-pick branch → `release/v2.1` titled `[cherry-pick] Original PR Title` with a link back to PR #1319
+7. Clean up the temporary worktree
 
 ## Dry-Run Mode
 
@@ -104,10 +115,10 @@ gh-cp 1319 release/v2.1 --dry-run
 
 In dry-run mode, the tool will:
 - ✅ Fetch PR information and validate it's merged
-- ✅ Create local branch and cherry-pick commits
-- 🔍 Show push command that would be executed
+- ✅ Create temporary worktree and cherry-pick commits
+- 🔍 Show push command that would be executed (from worktree)
 - 🔍 Show PR creation command that would be executed
-- ✅ Clean up local branch and return to original state
+- ✅ Clean up temporary worktree (your working directory remains untouched)
 
 ## Development
 

@@ -36,6 +36,52 @@ make install
 ./gh-cp <pr-number> <target-branch>
 ```
 
+## Testing
+
+### Test Data
+For development and testing, use these reference values:
+- **Test PR**: #10 "Add CLAUDE.md developer guide"
+- **Target branch**: `before-claude-md`
+
+### Dry-run Testing
+```bash
+# Basic dry-run test
+./gh-cp 10 before-claude-md --dry-run
+
+# Expected output:
+# ✓ Generated unique branch name: cherry-pick-to/before-claude-md/from/main/0
+# ✓ Created worktree at: /tmp/gh-cp-worktree-<random>
+# ✓ Cherry-picked 1 commits successfully
+# [DRY RUN] Would execute: git push --force -u origin ...
+# [DRY RUN] Would execute: gh pr create ...
+# ✓ Cleaning up worktree...
+# ✓ Cleaning up branch: cherry-pick-to/before-claude-md/from/main/0
+```
+
+### Branch Naming Verification
+Multiple runs should create incremental suffixes:
+```bash
+# First run (if no conflicts)
+./gh-cp 10 before-claude-md --dry-run
+# → cherry-pick-to/before-claude-md/from/main/0
+
+# Second run (increments suffix)
+./gh-cp 10 before-claude-md --dry-run
+# → cherry-pick-to/before-claude-md/from/main/1
+```
+
+### Cleanup Verification
+After each run, verify complete cleanup:
+```bash
+# Check no cherry-pick branches remain
+git branch | grep cherry-pick
+# Should return nothing
+
+# Check no temporary worktrees remain
+ls /tmp | grep gh-cp-worktree
+# Should return nothing
+```
+
 ## Architecture
 
 ### Package Structure
@@ -74,3 +120,7 @@ make install
 - **External**: GitHub CLI (`gh`) must be installed and authenticated
 - **Runtime**: Must be run from within a git repository
 - **Go modules**: Pure Go with no external dependencies in go.mod
+
+## Go Style Guide
+- When adding context to returned errors, keep the context succinct by avoiding phrases like "failed to", which state the obvious and pile up as the error percolates up through the stack
+- Do not add obvious comments in the code

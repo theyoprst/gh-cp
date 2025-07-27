@@ -32,53 +32,64 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		return fmt.Errorf("PR #%d has no commits", prNumber)
 	}
 
-	branchName := git.GenerateCherryPickBranchName(prData.BaseRefName, targetBranch, prData.Number)
-	fmt.Printf("✓ Generated branch name: %s\n", branchName)
-
-	originalBranch, err := git.GetCurrentBranch()
+	branchName, err := git.GenerateUniqueBranchName(prData.BaseRefName, targetBranch, prData.Number)
 	if err != nil {
-		return fmt.Errorf("get current branch: %w", err)
+		return fmt.Errorf("generate unique branch name: %w", err)
 	}
+	fmt.Printf("✓ Generated unique branch name: %s\n", branchName)
 
-	if err := git.CheckoutTargetBranch(targetBranch); err != nil {
-		return err
+	fmt.Printf("✓ Creating worktree for isolated operations...\n")
+	worktreePath, err := git.CreateWorktree(branchName, targetBranch)
+	if err != nil {
+		return fmt.Errorf("create worktree: %w", err)
 	}
-	fmt.Printf("✓ Checked out target branch: %s\n", targetBranch)
+	fmt.Printf("✓ Created worktree at: %s\n", worktreePath)
 
-	if err := git.CreateAndCheckoutBranch(branchName); err != nil {
-		return err
-	}
-	fmt.Printf("✓ Created branch: %s\n", branchName)
-
-	if err := git.CherryPickCommits(commitSHAs); err != nil {
-		if err := git.CheckoutTargetBranch(originalBranch); err != nil {
-			fmt.Printf("⚠️ Failed to switch back to original branch %s: %v\n", originalBranch, err)
+	defer func() {
+		fmt.Printf("✓ Cleaning up worktree...\n")
+		if err := git.RemoveWorktree(worktreePath); err != nil {
+			fmt.Printf("⚠️ Remove worktree %s: %v\n", worktreePath, err)
 		}
+
+		fmt.Printf("✓ Cleaning up branch: %s\n", branchName)
 		if err := git.DeleteBranch(branchName); err != nil {
-			fmt.Printf("⚠️ Failed to delete branch %s: %v\n", branchName, err)
+			fmt.Printf("⚠️ Delete branch %s: %v\n", branchName, err)
 		}
-		return fmt.Errorf("cherry-pick failed: %w", err)
+	}()
+
+	if err := git.CreateAndCheckoutBranchInDir(branchName, worktreePath); err != nil {
+		return fmt.Errorf("create branch in worktree: %w", err)
+	}
+	fmt.Printf("✓ Created and checked out branch: %s\n", branchName)
+
+	if err := git.CherryPickCommitsInDir(commitSHAs, worktreePath); err != nil {
+		if isClean, checkErr := git.IsWorktreeClean(worktreePath); checkErr == nil && !isClean {
+			fmt.Printf("⚠️ Cherry-pick failed with conflicts. Manual resolution required in: %s\n", worktreePath)
+			fmt.Printf("After resolving conflicts:\n")
+			fmt.Printf("  1. cd %s\n", worktreePath)
+			fmt.Printf("  2. git add . && git cherry-pick --continue (repeat for each commit)\n")
+			fmt.Printf("  3. git push --force -u origin %s\n", branchName)
+			fmt.Printf("  4. Create PR manually after completing cherry-pick\n")
+			fmt.Printf("  5. Remove temporary directory: rm -rf %s\n", worktreePath)
+			return fmt.Errorf("cherry-pick conflicts require manual resolution")
+		}
+		return fmt.Errorf("cherry-pick: %w", err)
 	}
 	fmt.Printf("✓ Cherry-picked %d commits successfully\n", len(commitSHAs))
 
-	if err := git.PushBranch(branchName, config.DryRun); err != nil {
+	if err := git.PushBranchFromDir(branchName, config.DryRun, worktreePath); err != nil {
 		return err
 	}
 
-	prURL, err := CreatePR(prData, targetBranch, config.DryRun)
+	prURL, err := CreatePR(prData, targetBranch, branchName, config.DryRun)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("✓ Created PR: %s\n", prURL)
+	if prURL != "" {
+		fmt.Printf("✓ Created PR: %s\n", prURL)
+	}
 
 	if config.DryRun {
-		fmt.Printf("✓ Cleaning up dry-run: switching back to %s and deleting %s\n", originalBranch, branchName)
-		if err := git.CheckoutTargetBranch(originalBranch); err != nil {
-			fmt.Printf("⚠️ Failed to switch back to original branch %s: %v\n", originalBranch, err)
-		}
-		if err := git.DeleteBranch(branchName); err != nil {
-			fmt.Printf("⚠️ Failed to delete dry-run branch %s: %v\n", branchName, err)
-		}
 		fmt.Println("✓ Dry run completed successfully")
 	} else {
 		fmt.Println("✓ Cherry-pick completed successfully")

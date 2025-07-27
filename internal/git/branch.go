@@ -6,8 +6,28 @@ import (
 	"strings"
 )
 
-// GenerateCherryPickBranchName creates a descriptive branch name for cherry-pick operations.
-func GenerateCherryPickBranchName(originalBranchName, targetBranch string, prNumber int) string {
+// GenerateUniqueBranchName creates a unique branch name by checking for conflicts and adding suffixes.
+func GenerateUniqueBranchName(originalBranchName, targetBranch string, prNumber int) (string, error) {
+	baseName := generateCherryPickBranchBaseName(originalBranchName, targetBranch, prNumber)
+
+	suffix := 0
+	for {
+		candidateName := fmt.Sprintf("%s/%d", baseName, suffix)
+		exists, err := CheckBranchExists(candidateName)
+		if err != nil {
+			return "", fmt.Errorf("check branch exists: %w", err)
+		}
+		if !exists {
+			return candidateName, nil
+		}
+		suffix++
+		if suffix > 100 {
+			return "", fmt.Errorf("too many branch name conflicts")
+		}
+	}
+}
+
+func generateCherryPickBranchBaseName(originalBranchName, targetBranch string, prNumber int) string {
 	if originalBranchName != "" {
 		cleanOriginal := strings.ReplaceAll(originalBranchName, "/", "-")
 		cleanTarget := strings.ReplaceAll(targetBranch, "/", "-")
