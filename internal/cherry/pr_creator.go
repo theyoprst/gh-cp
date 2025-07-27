@@ -8,6 +8,7 @@ import (
 	"github.com/theyoprst/gh-cp/internal/github"
 )
 
+// CreatePR creates a new GitHub pull request with the cherry-picked changes.
 func CreatePR(prData *github.PRData, targetBranch string, dryRun bool) (prURL string, err error) {
 	title := fmt.Sprintf("[cherry-pick] %s", prData.Title)
 
@@ -24,14 +25,8 @@ func CreatePR(prData *github.PRData, targetBranch string, dryRun bool) (prURL st
 	}
 
 	if dryRun {
-		escapedTitle := strings.ReplaceAll(title, `"`, `\"`)
-		escapedBody := strings.ReplaceAll(body, `"`, `\"`)
-
-		fmt.Printf("[DRY RUN] Would execute: gh pr create --title \"%s\" --body \"%s\" --base \"%s\"", escapedTitle, escapedBody, targetBranch)
-		if len(labels) > 0 {
-			fmt.Printf(" --label \"%s\"", strings.Join(labels, ","))
-		}
-		fmt.Println()
+		cmdStr := fmt.Sprintf("gh %s", strings.Join(args, " "))
+		fmt.Printf("[DRY RUN] Would execute: %s\n", cmdStr)
 		return "", nil
 	}
 

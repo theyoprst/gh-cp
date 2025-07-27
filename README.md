@@ -8,6 +8,36 @@ A CLI utility written in Go that allows you to cherry-pick entire GitHub pull re
 - GitHub CLI (`gh`) - must be pre-configured and authenticated
 - Git repository with proper access permissions
 
+## Installation
+
+### Quick Install (Recommended)
+
+```bash
+go install github.com/theyoprst/gh-cp/cmd/gh-cp@latest
+```
+
+This will download, build, and install the `gh-cp` binary to your `$(go env GOPATH)/bin` directory.
+
+### Alternative: Build from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/theyoprst/gh-cp.git
+cd gh-cp
+
+# Build and install
+make install
+```
+
+### Verify Installation
+
+```bash
+# Check if gh-cp is available
+gh-cp --help
+```
+
+**Note**: Make sure your `$(go env GOPATH)/bin` is in your system's `$PATH` environment variable.
+
 ## Usage
 
 ```bash
@@ -78,3 +108,46 @@ In dry-run mode, the tool will:
 - 🔍 Show push command that would be executed
 - 🔍 Show PR creation command that would be executed
 - ✅ Clean up local branch and return to original state
+
+## Development
+
+### Building from Source
+
+```bash
+# Build the binary
+make build
+
+# Clean build artifacts
+make clean
+```
+
+### Code Quality
+
+```bash
+# Run linters
+make lint
+
+# Auto-fix linting issues where possible
+make lint-fix
+```
+
+### Testing
+
+```bash
+# Run tests
+make test
+```
+
+### Installation
+
+```bash
+# Build and install to $(go env GOPATH)/bin
+make install
+```
+
+### Project Structure
+
+- `cmd/gh-cp/` - Main application entry point
+- `internal/github/` - GitHub API integration
+- `internal/git/` - Git operations
+- `internal/cherry/` - Core cherry-pick logic

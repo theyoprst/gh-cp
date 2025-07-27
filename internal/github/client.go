@@ -1,3 +1,4 @@
+// Package github provides GitHub API integration via the gh CLI.
 package github
 
 import (

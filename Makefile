@@ -1,4 +1,4 @@
-.PHONY: build clean test install
+.PHONY: build clean test install lint lint-fix
 
 build:
 	go build -o gh-cp ./cmd/gh-cp
@@ -9,7 +9,13 @@ clean:
 test:
 	go test ./...
 
+lint:
+	golangci-lint run
+
+lint-fix:
+	golangci-lint run --fix
+
 install: build
-	cp gh-cp $(GOPATH)/bin/
+	cp gh-cp $(shell go env GOPATH)/bin/
 
 .DEFAULT_GOAL := build
