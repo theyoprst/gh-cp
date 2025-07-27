@@ -13,7 +13,7 @@ func CreateWorktree(branchName, targetBranch string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	cmd := exec.Command("git", "worktree", "add", worktreePath, targetBranch)
 	if err := cmd.Run(); err != nil {
 		// Clean up the created directory if worktree creation fails
@@ -22,7 +22,7 @@ func CreateWorktree(branchName, targetBranch string) (string, error) {
 		}
 		return "", fmt.Errorf("create worktree: %w", err)
 	}
-	
+
 	return worktreePath, nil
 }
 
@@ -41,7 +41,6 @@ func GetUniqueWorktreePath() (string, error) {
 	}
 	return worktreePath, nil
 }
-
 
 func CheckBranchExists(branchName string) (bool, error) {
 	cmd := exec.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchName)

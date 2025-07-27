@@ -3,14 +3,14 @@ package github
 import "time"
 
 type PRData struct {
-	Number      int       `json:"number"`
-	Title       string    `json:"title"`
-	Body        string    `json:"body"`
-	State       string    `json:"state"`
-	BaseRefName string    `json:"baseRefName"`
-	MergeCommit *Commit   `json:"mergeCommit"`
-	Commits     []Commit  `json:"commits"`
-	Labels      []Label   `json:"labels"`
+	Number      int      `json:"number"`
+	Title       string   `json:"title"`
+	Body        string   `json:"body"`
+	State       string   `json:"state"`
+	BaseRefName string   `json:"baseRefName"`
+	MergeCommit *Commit  `json:"mergeCommit"`
+	Commits     []Commit `json:"commits"`
+	Labels      []Label  `json:"labels"`
 }
 
 type Commit struct {
