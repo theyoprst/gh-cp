@@ -1,3 +1,4 @@
+// Package cherry provides the main cherry-pick orchestration logic.
 package cherry
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/theyoprst/gh-cp/internal/github"
 )
 
+// CherryPickPR orchestrates the complete cherry-pick workflow for a GitHub PR.
 func CherryPickPR(prNumber int, targetBranch string, config *github.Config) error {
 	if !git.IsGitRepo() {
 		return fmt.Errorf("not in a git repository")
