@@ -23,7 +23,9 @@ to destination branches, preserving original PR metadata.
 
 The tool integrates with GitHub CLI (gh) and git commands to automate
 the cherry-pick workflow including creating a new branch, cherry-picking
-commits, and creating a new pull request.`,
+commits, and creating a new pull request.
+
+Target branch can be specified as 'branch' or 'remote/branch' format.`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber, err := strconv.Atoi(args[0])

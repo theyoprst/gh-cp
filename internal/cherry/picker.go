@@ -9,7 +9,7 @@ import (
 )
 
 // CherryPickPR orchestrates the complete cherry-pick workflow for a GitHub PR.
-func CherryPickPR(prNumber int, targetBranch string, config *github.Config) error {
+func CherryPickPR(prNumber int, userTargetBranch string, config *github.Config) error {
 	if !git.IsGitRepo() {
 		return fmt.Errorf("not in a git repository")
 	}
@@ -33,21 +33,21 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 	}
 
 	// Parse and fetch the target branch
-	remote, localTargetBranch, err := git.ParseRemoteAndBranch(targetBranch)
+	remote, targetBranch, err := git.ParseRemoteAndBranch(userTargetBranch)
 	if err != nil {
 		return fmt.Errorf("parse target branch: %w", err)
 	}
 
-	fmt.Printf("Fetching branch '%s' from remote '%s'...\n", localTargetBranch, remote)
-	if err := git.FetchRemoteBranch(remote, localTargetBranch); err != nil {
+	fmt.Printf("Fetching branch '%s' from remote '%s'...\n", targetBranch, remote)
+	if err := git.FetchRemoteBranch(remote, targetBranch); err != nil {
 		return fmt.Errorf("fetch remote branch: %w", err)
 	}
-	fmt.Printf("✓ Fetched branch '%s' from remote '%s'\n", localTargetBranch, remote)
+	fmt.Printf("✓ Fetched branch '%s' from remote '%s'\n", targetBranch, remote)
 
 	// Construct tracking target branch name
-	trackingTargetBranch := fmt.Sprintf("%s/%s", remote, localTargetBranch)
+	trackingTargetBranch := fmt.Sprintf("%s/%s", remote, targetBranch)
 
-	branchName, err := git.GenerateUniqueBranchName(prData.BaseRefName, trackingTargetBranch, prData.Number)
+	branchName, err := git.GenerateUniqueBranchName(prData.BaseRefName, targetBranch, prData.Number)
 	if err != nil {
 		return fmt.Errorf("generate unique branch name: %w", err)
 	}
@@ -97,7 +97,7 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		return err
 	}
 
-	prURL, err := CreatePR(prData, localTargetBranch, branchName, config.DryRun)
+	prURL, err := CreatePR(prData, targetBranch, branchName, config.DryRun)
 	if err != nil {
 		return err
 	}
