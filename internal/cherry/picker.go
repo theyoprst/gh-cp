@@ -14,7 +14,7 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		return fmt.Errorf("not in a git repository")
 	}
 
-	fmt.Printf("✓ Fetching PR #%d...\n", prNumber)
+	fmt.Printf("Fetching PR #%d...\n", prNumber)
 	prData, err := github.FetchPRData(prNumber)
 	if err != nil {
 		return fmt.Errorf("fetch PR data: %w", err)
@@ -32,28 +32,47 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		return fmt.Errorf("PR #%d has no commits", prNumber)
 	}
 
-	branchName, err := git.GenerateUniqueBranchName(prData.BaseRefName, targetBranch, prData.Number)
+	// Parse and fetch the target branch
+	remote, localTargetBranch, err := git.ParseRemoteAndBranch(targetBranch)
+	if err != nil {
+		return fmt.Errorf("parse target branch: %w", err)
+	}
+
+	fmt.Printf("Fetching branch '%s' from remote '%s'...\n", localTargetBranch, remote)
+	if err := git.FetchRemoteBranch(remote, localTargetBranch); err != nil {
+		return fmt.Errorf("fetch remote branch: %w", err)
+	}
+	fmt.Printf("✓ Fetched branch '%s' from remote '%s'\n", localTargetBranch, remote)
+
+	// Construct tracking target branch name
+	trackingTargetBranch := fmt.Sprintf("%s/%s", remote, localTargetBranch)
+
+	branchName, err := git.GenerateUniqueBranchName(prData.BaseRefName, trackingTargetBranch, prData.Number)
 	if err != nil {
 		return fmt.Errorf("generate unique branch name: %w", err)
 	}
 	fmt.Printf("✓ Generated unique branch name: %s\n", branchName)
 
-	fmt.Printf("✓ Creating worktree for isolated operations...\n")
-	worktreePath, err := git.CreateWorktree(branchName, targetBranch)
+	fmt.Printf("Creating worktree for isolated operations...\n")
+	worktreePath, err := git.CreateWorktree(branchName, trackingTargetBranch)
 	if err != nil {
 		return fmt.Errorf("create worktree: %w", err)
 	}
 	fmt.Printf("✓ Created worktree at: %s\n", worktreePath)
 
 	defer func() {
-		fmt.Printf("✓ Cleaning up worktree...\n")
+		fmt.Printf("Cleaning up worktree...\n")
 		if err := git.RemoveWorktree(worktreePath); err != nil {
 			fmt.Printf("⚠️ Remove worktree %s: %v\n", worktreePath, err)
+		} else {
+			fmt.Printf("✓ Cleaned up worktree\n")
 		}
 
-		fmt.Printf("✓ Cleaning up branch: %s\n", branchName)
+		fmt.Printf("Cleaning up branch: %s\n", branchName)
 		if err := git.DeleteBranch(branchName); err != nil {
 			fmt.Printf("⚠️ Delete branch %s: %v\n", branchName, err)
+		} else {
+			fmt.Printf("✓ Cleaned up branch: %s\n", branchName)
 		}
 	}()
 
@@ -78,7 +97,7 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		return err
 	}
 
-	prURL, err := CreatePR(prData, targetBranch, branchName, config.DryRun)
+	prURL, err := CreatePR(prData, localTargetBranch, branchName, config.DryRun)
 	if err != nil {
 		return err
 	}

@@ -3,42 +3,7 @@ package git
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 )
-
-func CheckoutTargetBranch(targetBranch string) error {
-	return CheckoutTargetBranchInDir(targetBranch, "")
-}
-
-func CheckoutTargetBranchInDir(targetBranch, workingDir string) error {
-	cmd := exec.Command("git", "checkout", targetBranch)
-	if workingDir != "" {
-		cmd.Dir = workingDir
-	}
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("checkout target branch %s: %w", targetBranch, err)
-	}
-	return nil
-}
-
-func CreateAndCheckoutBranch(branchName string) error {
-	return CreateAndCheckoutBranchInDir(branchName, "")
-}
-
-func CreateAndCheckoutBranchInDir(branchName, workingDir string) error {
-	cmd := exec.Command("git", "checkout", "-B", branchName)
-	if workingDir != "" {
-		cmd.Dir = workingDir
-	}
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("create and checkout branch %s: %w", branchName, err)
-	}
-	return nil
-}
-
-func CherryPickCommits(commitSHAs []string) error {
-	return CherryPickCommitsInDir(commitSHAs, "")
-}
 
 func CherryPickCommitsInDir(commitSHAs []string, workingDir string) error {
 	for _, sha := range commitSHAs {
@@ -51,10 +16,6 @@ func CherryPickCommitsInDir(commitSHAs []string, workingDir string) error {
 		}
 	}
 	return nil
-}
-
-func PushBranch(branchName string, dryRun bool) error {
-	return PushBranchFromDir(branchName, dryRun, "")
 }
 
 func PushBranchFromDir(branchName string, dryRun bool, workingDir string) error {
@@ -87,15 +48,6 @@ func DeleteBranch(branchName string) error {
 		return fmt.Errorf("delete branch %s: %w\nOutput: %s", branchName, err, string(output))
 	}
 	return nil
-}
-
-func GetCurrentBranch() (string, error) {
-	cmd := exec.Command("git", "branch", "--show-current")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("get current branch: %w", err)
-	}
-	return strings.TrimSpace(string(output)), nil
 }
 
 func IsGitRepo() bool {
