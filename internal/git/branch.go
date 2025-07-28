@@ -13,7 +13,7 @@ func GenerateUniqueBranchName(originalBranchName, targetBranch string, prNumber 
 	suffix := 0
 	for {
 		candidateName := fmt.Sprintf("%s/%d", baseName, suffix)
-		exists, err := CheckBranchExists(candidateName)
+		exists, err := checkBranchExists(candidateName)
 		if err != nil {
 			return "", fmt.Errorf("check branch exists: %w", err)
 		}

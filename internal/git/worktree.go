@@ -9,7 +9,7 @@ import (
 )
 
 func CreateWorktree(branchName, targetBranch string) (string, error) {
-	worktreePath, err := GetUniqueWorktreePath()
+	worktreePath, err := getUniqueWorktreePath()
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +39,7 @@ func RemoveWorktree(worktreePath string) error {
 	return nil
 }
 
-func GetUniqueWorktreePath() (string, error) {
+func getUniqueWorktreePath() (string, error) {
 	worktreePath, err := os.MkdirTemp("", "gh-cp-worktree-")
 	if err != nil {
 		return "", fmt.Errorf("create temp directory: %w", err)
@@ -47,7 +47,7 @@ func GetUniqueWorktreePath() (string, error) {
 	return worktreePath, nil
 }
 
-func CheckBranchExists(branchName string) (bool, error) {
+func checkBranchExists(branchName string) (bool, error) {
 	cmd := exec.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchName)
 	err := cmd.Run()
 	if err != nil {
