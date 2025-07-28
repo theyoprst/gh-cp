@@ -119,7 +119,6 @@ ls /tmp | grep gh-cp-worktree
 ### Dependencies
 - **External**: GitHub CLI (`gh`) must be installed and authenticated
 - **Runtime**: Must be run from within a git repository
-- **Go modules**: Pure Go with no external dependencies in go.mod
 
 ## Go Style Guide
 - When adding context to returned errors, keep the context succinct by avoiding phrases like "failed to", which state the obvious and pile up as the error percolates up through the stack
