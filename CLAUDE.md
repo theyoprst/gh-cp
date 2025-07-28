@@ -46,7 +46,7 @@ For development and testing, use these reference values:
 ### Dry-run Testing
 ```bash
 # Basic dry-run test
-./gh-cp 10 before-claude-md --dry-run
+./gh-cp 10 origin/before-claude-md --dry-run
 
 # Expected output:
 # ✓ Generated unique branch name: cherry-pick-to/before-claude-md/from/main/0
@@ -62,11 +62,11 @@ For development and testing, use these reference values:
 Multiple runs should create incremental suffixes:
 ```bash
 # First run (if no conflicts)
-./gh-cp 10 before-claude-md --dry-run
+./gh-cp 10 origin/before-claude-md --dry-run
 # → cherry-pick-to/before-claude-md/from/main/0
 
 # Second run (increments suffix)
-./gh-cp 10 before-claude-md --dry-run
+./gh-cp 10 origin/before-claude-md --dry-run
 # → cherry-pick-to/before-claude-md/from/main/1
 ```
 

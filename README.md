@@ -46,13 +46,16 @@ gh-cp <pull-request-number> <target-branch> [--dry-run]
 
 **Parameters:**
 - `pull-request-number` - The number of the merged pull request to cherry-pick
-- `target-branch` - The destination branch to cherry-pick the changes to (also becomes the base branch for the new PR)
+- `target-branch` - The destination branch to cherry-pick the changes to (can be `branch` or `remote/branch` format)
 - `--dry-run` - (Optional) Preview mode: shows what would be done without making any remote changes
 
 **Examples:**
 ```bash
 # Cherry-pick PR #1319 to release/v2.1 branch
 gh-cp 1319 release/v2.1
+
+# Cherry-pick PR #1319 to origin/release/v2.1 branch
+gh-cp 1319 origin/release/v2.1
 
 # Preview the cherry-pick operation without making changes
 gh-cp 1319 release/v2.1 --dry-run
@@ -64,13 +67,15 @@ gh-cp 1319 release/v2.1 --dry-run
 
 2. **Validates PR State**: Ensures the PR is merged (cherry-picking unmerged changes is not supported)
 
-3. **Creates Isolated Worktree**: Creates a temporary git worktree to perform operations without affecting your current working directory, allowing cherry-picking even with uncommitted changes
+3. **Fetches Remote State**: Automatically fetches the latest state of the target branch from the remote
 
-4. **Creates New Branch**: Creates a new branch with the naming pattern `cherry-pick-to/target-branch/from/original-branch`. If the branch already exists, adds incremental suffixes (`/0`, `/1`, etc.)
+4. **Creates Isolated Worktree**: Creates a temporary git worktree to perform operations without affecting your current working directory, allowing cherry-picking even with uncommitted changes
 
-5. **Cherry-picks Changes**: Applies all commits from the original PR to the new branch in the isolated worktree
+5. **Creates New Branch**: Creates a new branch with the naming pattern `cherry-pick-to/target-branch/from/original-branch`. If the branch already exists, adds incremental suffixes (`/0`, `/1`, etc.)
 
-6. **Creates New PR**: Pushes changes and creates a new pull request targeting the specified branch with:
+6. **Cherry-picks Changes**: Applies all commits from the original PR to the new branch in the isolated worktree
+
+7. **Creates New PR**: Pushes changes and creates a new pull request targeting the specified branch with:
    - Title prefixed with `[cherry-pick]`
    - Body prefixed with a reference message linking to the original PR
    - All original labels copied over
