@@ -57,9 +57,6 @@ func CherryPickPR(prNumber int, targetBranch string, config *github.Config) erro
 		}
 	}()
 
-	if err := git.CreateAndCheckoutBranchInDir(branchName, worktreePath); err != nil {
-		return fmt.Errorf("create branch in worktree: %w", err)
-	}
 	fmt.Printf("✓ Created and checked out branch: %s\n", branchName)
 
 	if err := git.CherryPickCommitsInDir(commitSHAs, worktreePath); err != nil {

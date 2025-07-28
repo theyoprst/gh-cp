@@ -14,7 +14,7 @@ func CreateWorktree(branchName, targetBranch string) (string, error) {
 		return "", err
 	}
 
-	cmdArgs := []string{"git", "worktree", "add", worktreePath, targetBranch}
+	cmdArgs := []string{"git", "worktree", "add", worktreePath, targetBranch, "-b", branchName}
 	fmt.Printf("Executing: %s\n", strings.Join(cmdArgs, " "))
 
 	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
