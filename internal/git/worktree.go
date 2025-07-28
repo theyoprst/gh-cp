@@ -14,13 +14,18 @@ func CreateWorktree(branchName, targetBranch string) (string, error) {
 		return "", err
 	}
 
-	cmd := exec.Command("git", "worktree", "add", worktreePath, targetBranch)
-	if err := cmd.Run(); err != nil {
+	cmdArgs := []string{"git", "worktree", "add", worktreePath, targetBranch}
+	fmt.Printf("Executing: %s\n", strings.Join(cmdArgs, " "))
+
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		worktreeCmd := strings.Join(cmdArgs, " ")
 		// Clean up the created directory if worktree creation fails
 		if removeErr := os.RemoveAll(worktreePath); removeErr != nil {
-			return "", fmt.Errorf("create worktree: %w (cleanup failed: %w)", err, removeErr)
+			return "", fmt.Errorf("create worktree with command '%s': %w (cleanup failed: %w)\nOutput: %s", worktreeCmd, err, removeErr, string(output))
 		}
-		return "", fmt.Errorf("create worktree: %w", err)
+		return "", fmt.Errorf("create worktree with command '%s': %w\nOutput: %s", worktreeCmd, err, string(output))
 	}
 
 	return worktreePath, nil
