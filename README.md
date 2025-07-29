@@ -38,6 +38,37 @@ gh-cp --help
 
 **Note**: Make sure your `$(go env GOPATH)/bin` is in your system's `$PATH` environment variable.
 
+## Upgrading
+
+The standard `go install github.com/theyoprst/gh-cp/cmd/gh-cp@latest` command won't upgrade if you already have the same version installed. Use one of these methods to force an upgrade:
+
+### Recommended: Force Rebuild
+```bash
+go install -a github.com/theyoprst/gh-cp/cmd/gh-cp@latest
+```
+
+### Alternative: Clear Build Cache
+```bash
+go clean -cache && go install github.com/theyoprst/gh-cp/cmd/gh-cp@latest
+```
+
+### Nuclear Option: Clear Module Cache
+```bash
+go clean -modcache && go install github.com/theyoprst/gh-cp/cmd/gh-cp@latest
+```
+
+**Note**: The `-modcache` option removes all cached Go modules and will cause slower builds for all Go projects until modules are re-downloaded.
+
+### Third-Party Tools
+For users managing many Go binaries, consider tools like [gup](https://github.com/nao1215/gup) which can update all Go binaries automatically:
+```bash
+# Install gup
+go install github.com/nao1215/gup@latest
+
+# Update all Go binaries
+gup update
+```
+
 ## Usage
 
 ```bash
