@@ -123,3 +123,4 @@ ls /tmp | grep gh-cp-worktree
 ## Go Style Guide
 - When adding context to returned errors, keep the context succinct by avoiding phrases like "failed to", which state the obvious and pile up as the error percolates up through the stack
 - Do not add obvious comments in the code
+- Export as less as possible
