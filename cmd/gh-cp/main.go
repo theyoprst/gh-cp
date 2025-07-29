@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/theyoprst/gh-cp/internal/cherry"
 	"github.com/theyoprst/gh-cp/internal/github"
+	"github.com/theyoprst/gh-cp/internal/version"
 )
 
 var (
@@ -50,8 +51,17 @@ Target branch can be specified as 'branch' or 'remote/branch' format.`,
 	},
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		version.PrintVersion()
+	},
+}
+
 func main() {
 	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "show what would be done without executing remote operations")
+	rootCmd.AddCommand(versionCmd)
 	rootCmd.InitDefaultCompletionCmd()
 
 	if err := rootCmd.Execute(); err != nil {
