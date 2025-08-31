@@ -22,10 +22,14 @@ func CherryPickPR(prNumber int, userTargetBranch string, config *github.Config) 
 
 	fmt.Printf("✓ Fetched PR #%d: \"%s\"\n", prData.Number, prData.Title)
 
-	if err := github.ValidatePRMerged(prData); err != nil {
-		return err
+	if config.SkipMergedCheck {
+		fmt.Printf("⚠️  Skipping merged state check (--skip-merged-check flag is set)\n")
+	} else {
+		if err := github.ValidatePRMerged(prData); err != nil {
+			return err
+		}
+		fmt.Printf("✓ Validated PR is merged\n")
 	}
-	fmt.Printf("✓ Validated PR is merged\n")
 
 	commitSHAs := github.GetCommitSHAs(prData)
 	if len(commitSHAs) == 0 {

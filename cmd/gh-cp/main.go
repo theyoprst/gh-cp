@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	dryRun bool
+	dryRun          bool
+	skipMergedCheck bool
 )
 
 var rootCmd = &cobra.Command{
@@ -44,7 +45,8 @@ Target branch can be specified as 'branch' or 'remote/branch' format.`,
 		}
 
 		config := &github.Config{
-			DryRun: dryRun,
+			DryRun:          dryRun,
+			SkipMergedCheck: skipMergedCheck,
 		}
 
 		return cherry.CherryPickPR(prNumber, targetBranch, config)
@@ -61,6 +63,7 @@ var versionCmd = &cobra.Command{
 
 func main() {
 	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "show what would be done without executing remote operations")
+	rootCmd.Flags().BoolVar(&skipMergedCheck, "skip-merged-check", false, "skip check that PR is merged (use with caution)")
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.InitDefaultCompletionCmd()
 

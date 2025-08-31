@@ -31,5 +31,6 @@ type Label struct {
 }
 
 type Config struct {
-	DryRun bool
+	DryRun          bool
+	SkipMergedCheck bool
 }
