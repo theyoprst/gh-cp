@@ -26,7 +26,7 @@ func FetchPRData(prNumber int) (*PRData, error) {
 
 func ValidatePRMerged(prData *PRData) error {
 	if strings.ToLower(prData.State) != "merged" {
-		return fmt.Errorf("PR #%d is not merged (state: %s)", prData.Number, prData.State)
+		return fmt.Errorf("PR #%d is not merged (state: %s). Use --skip-merged-check to override", prData.Number, prData.State)
 	}
 
 	if prData.MergeCommit == nil {
