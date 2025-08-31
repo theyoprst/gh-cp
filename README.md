@@ -79,6 +79,7 @@ gh-cp <pull-request-number> <target-branch> [--dry-run]
 - `pull-request-number` - The number of the merged pull request to cherry-pick
 - `target-branch` - The destination branch to cherry-pick the changes to (can be `branch` or `remote/branch` format)
 - `--dry-run` - (Optional) Preview mode: shows what would be done without making any remote changes
+- `--skip-merged-check` - (Optional) Skip check that PR is merged (use with caution when cherry-picking unmerged PRs)
 
 **Examples:**
 ```bash
@@ -90,6 +91,9 @@ gh-cp 1319 origin/release/v2.1
 
 # Preview the cherry-pick operation without making changes
 gh-cp 1319 release/v2.1 --dry-run
+
+# Cherry-pick an unmerged PR (use with caution)
+gh-cp 1319 release/v2.1 --skip-merged-check
 ```
 
 ## How It Works
@@ -116,7 +120,7 @@ gh-cp 1319 release/v2.1 --dry-run
 ## Current Limitations
 
 - **Conflict Resolution**: The tool does not automatically resolve merge conflicts. If conflicts occur during cherry-picking, the tool will leave the worktree in place and provide instructions for manual resolution
-- **Merged PRs Only**: Only works with merged pull requests
+- **Merged PRs Only**: By default, only works with merged pull requests (use `--skip-merged-check` to override)
 
 ## Conflict Resolution
 
