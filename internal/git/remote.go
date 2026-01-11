@@ -23,7 +23,7 @@ func getRemotes() ([]string, error) {
 	return strings.Split(remotesStr, "\n"), nil
 }
 
-// getDefaultRemote returns the first available remote.
+// getDefaultRemote returns the default remote, preferring "origin" if it exists.
 func getDefaultRemote() (string, error) {
 	remotes, err := getRemotes()
 	if err != nil {
@@ -32,6 +32,10 @@ func getDefaultRemote() (string, error) {
 
 	if len(remotes) == 0 {
 		return "", fmt.Errorf("no git remotes configured")
+	}
+
+	if slices.Contains(remotes, "origin") {
+		return "origin", nil
 	}
 
 	return remotes[0], nil
